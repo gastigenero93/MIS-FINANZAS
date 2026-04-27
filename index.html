@@ -3,71 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas PRO</title>
+    <title>Finanzas Gastón</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body class="bg-gray-50 font-sans">
-    <div class="max-w-md mx-auto p-4">
-        <div class="bg-white rounded-3xl shadow-xl p-6 mt-4">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Mi Billetera</h1>
-                    <p class="text-gray-500">Control de Gastos</p>
-                </div>
-                <button onclick="borrarTodo()" class="text-xs text-red-400 font-bold uppercase">Limpiar</button>
+<body class="bg-slate-50 font-sans text-slate-900">
+    <div class="max-w-md mx-auto p-4 pb-20">
+        <div class="flex justify-between items-center mb-6 mt-4">
+            <div>
+                <h1 class="text-2xl font-bold">Mis Finanzas</h1>
+                <p id="fecha-actual" class="text-slate-500 text-sm font-medium capitalize"></p>
             </div>
-
-            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white mb-6 shadow-lg">
-                <p class="text-gray-400 text-xs uppercase font-bold tracking-widest">Balance Disponible</p>
-                <p id="balance" class="text-4xl font-bold mt-1">$ 0</p>
-            </div>
-
-            <div class="space-y-3 bg-gray-50 p-4 rounded-2xl mb-6">
-                <input id="desc" type="text" placeholder="¿Qué es? (Ej: Sueldo, Pizza...)" class="w-full p-3 bg-white border-none rounded-xl shadow-sm outline-none">
-                <input id="monto" type="number" placeholder="Monto $" class="w-full p-3 bg-white border-none rounded-xl shadow-sm outline-none">
-                <div class="flex gap-2">
-                    <button onclick="agregar('ingreso')" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl active:scale-95 transition-all">💰 Ingreso</button>
-                    <button onclick="agregar('gasto')" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl active:scale-95 transition-all">💸 Gasto</button>
-                </div>
-            </div>
-
-            <h3 class="text-gray-400 text-xs font-bold uppercase mb-4 tracking-widest">Movimientos</h3>
-            <ul id="lista" class="space-y-3"></ul>
+            <button onclick="borrarTodo()" class="bg-slate-200 p-2 rounded-full active:scale-90 transition-transform">🗑️</button>
         </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Balance Total</p>
+                <p id="balance" class="text-xl font-bold text-slate-800">$ 0</p>
+            </div>
+            <div class="bg-blue-600 p-4 rounded-3xl shadow-lg shadow-blue-100 text-white">
+                <p class="text-blue-200 text-[10px] font-bold uppercase tracking-wider">Gastos del Mes</p>
+                <p id="gasto-mensual" class="text-xl font-bold">$ 0</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-6 mb-8">
+            <div class="space-y-4">
+                <input id="desc" type="text" placeholder="¿Qué compraste?" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <div class="flex gap-2">
+                    <input id="monto" type="number" placeholder="Monto $" class="flex-1 p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="cat" class="p-4 bg-slate-50 border-none rounded-2xl outline-none text-2xl">
+                        <option value="otros">📦</option>
+                        <option value="comida">🍔</option>
+                        <option value="alquiler">🏠</option>
+                        <option value="expensas">🏢</option>
+                        <option value="telefono">📱</option>
+                        <option value="sueldo">💰</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="agregar('ingreso')" class="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-emerald-100">Ingreso</button>
+                    <button onclick="agregar('gasto')" class="flex-1 bg-rose-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-rose-100">Gasto</button>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-slate-400 text-xs font-bold uppercase mb-4 px-2 tracking-widest">Movimientos Recientes</h3>
+        <ul id="lista" class="space-y-3"></ul>
     </div>
 
     <script>
-        let movimientos = JSON.parse(localStorage.getItem('movimientos_gaston')) || [];
+        const iconMap = {
+            comida: '🍔', alquiler: '🏠', expensas: '🏢',
+            telefono: '📱', sueldo: '💰', otros: '📦'
+        };
+
+        let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v3')) || [];
         
         function actualizar() {
             const lista = document.getElementById('lista');
             const balanceElt = document.getElementById('balance');
+            const gastoMensualElt = document.getElementById('gasto-mensual');
+            const fechaElt = document.getElementById('fecha-actual');
+            
+            const hoy = new Date();
+            fechaElt.innerText = hoy.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+
             lista.innerHTML = '';
             let balance = 0;
+            let gastoMes = 0;
             
-            movimientos.slice().reverse().forEach((m, i) => {
+            const mesActual = hoy.getMonth();
+            const anioActual = hoy.getFullYear();
+
+            movimientos.slice().reverse().forEach((m) => {
+                const fechaM = new Date(m.fecha);
                 const esIngreso = m.tipo === 'ingreso';
-                balance += esIngreso ? parseFloat(m.monto) : -parseFloat(m.monto);
+                const montoNum = parseFloat(m.monto);
+
+                // Calcular balance total
+                balance += esIngreso ? montoNum : -montoNum;
+
+                // Calcular gasto del mes actual
+                if (!esIngreso && fechaM.getMonth() === mesActual && fechaM.getFullYear() === anioActual) {
+                    gastoMes += montoNum;
+                }
                 
                 lista.innerHTML += `
-                    <li class="flex justify-between items-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <span class="text-gray-700 font-medium">${m.desc}</span>
-                        <span class="${esIngreso ? 'text-green-500' : 'text-red-500'} font-bold">
-                            ${esIngreso ? '+' : '-'}$${parseFloat(m.monto).toLocaleString()}
+                    <li class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm border border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${iconMap[m.cat] || '📦'}</span>
+                            <div>
+                                <p class="text-sm font-bold text-slate-700">${m.desc}</p>
+                                <p class="text-[10px] text-slate-400 font-medium">${fechaM.toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <span class="${esIngreso ? 'text-emerald-500' : 'text-rose-500'} font-bold">
+                            ${esIngreso ? '+' : '-'}$${montoNum.toLocaleString()}
                         </span>
                     </li>`;
             });
+
             balanceElt.innerText = `$ ${balance.toLocaleString()}`;
-            localStorage.setItem('movimientos_gaston', JSON.stringify(movimientos));
+            gastoMensualElt.innerText = `$ ${gastoMes.toLocaleString()}`;
+            localStorage.setItem('finanzas_gasti_v3', JSON.stringify(movimientos));
         }
 
         function agregar(tipo) {
             const desc = document.getElementById('desc').value;
             const monto = document.getElementById('monto').value;
+            const cat = document.getElementById('cat').value;
             if(desc && monto) {
-                movimientos.push({desc, monto, tipo});
+                movimientos.push({
+                    desc, 
+                    monto, 
+                    tipo, 
+                    cat, 
+                    fecha: new Date().toISOString()
+                });
                 document.getElementById('desc').value = '';
                 document.getElementById('monto').value = '';
                 actualizar();
@@ -75,7 +132,7 @@
         }
 
         function borrarTodo() {
-            if(confirm('¿Borrar todos los datos?')) {
+            if(confirm('¿Borrar historial?')) {
                 movimientos = [];
                 actualizar();
             }
