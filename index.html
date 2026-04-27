@@ -3,17 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas Gasti</title>
+    <title>Finanzas Gasti PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/gastigenero93/MIS-FINANZAS/main/icon.png">
-    <meta name="apple-mobile-web-app-title" content="Finanzas">
+    <link rel="apple-touch-icon" href="https://fav.farm/💸">
+    <link rel="icon" href="https://fav.farm/💸">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Finanzas">
 </head>
 <body class="bg-[#0f172a] text-slate-200 font-sans">
-    ```
+    <div class="max-w-md mx-auto p-5 pb-24">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance</h1>
+            <div class="flex gap-2">
+                <button onclick="exportarWA()" class="bg-emerald-900/30 p-2 rounded-xl border border-emerald-500/30">📲</button>
+                <button onclick="borrarTodo()" class="bg-rose-900/30 p-2 rounded-xl text-rose-400 border border-rose-500/30">🗑️</button>
+            </div>
+        </div>
 
-*(Nota: Solo pegá el código completo que te pasé antes, asegurándote de que la parte de arriba tenga esas líneas nuevas).*
+        <div class="bg-slate-800 rounded-[2rem] p-7 text-white shadow-2xl mb-8 border border-slate-700 relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Disponible Total</p>
+                <h2 id="balance" class="text-4xl font-bold mb-6 text-yellow-400">$ 0</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-2">
+                            <span id="label-presupuesto" class="text-slate-400 uppercase font-bold tracking-tighter">Límite: $1.200.000</span>
+                            <span id="porcentaje" class="font-bold text-blue-400 text-xs">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
+                            <div id="barra-progreso" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-**¿Probaste lo de borrar el historial de Safari? Eso suele ser el "santo remedio".**
+        <div class="bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-700 mb-8">
+            <div class="grid grid-cols-1 gap-4">
+                <input id="desc" type="text" placeholder="¿Qué es?" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-blue-500">
+                <div class="flex gap-2">
+                    <input id="monto" type="number" placeholder="Monto $" class="flex-1 p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-blue-500">
+                    <select id="cat" class="bg-slate-700 px-4 rounded-2xl text-2xl border border-slate-600">
+                        <option value="comida">🍔</option>
+                        <option value="alquiler">🏠</option>
+                        <option value="expensas">🏢</option>
+                        <option value="telefono">📱</option>
+                        <option value="sueldo">💰</option>
+                        <option value="otros">📦</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="agregar('ingreso')" class="flex-1 bg-emerald-600 text-white font-bold py-4 rounded-2xl active:scale-95 shadow-lg shadow-emerald-900/20">Ingreso</button>
+                    <button onclick="agregar('gasto')" class="flex-1 bg-rose-600 text-white font-bold py-4 rounded-2xl active:scale-95 shadow-lg shadow-rose-900/20">Gasto</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-end mb-4 px-2">
+            <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest">Movimientos</h3>
+            <span id="gasto-mes-texto" class="text-xs font-bold text-slate-300 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">Mes: $0</span>
+        </div>
+        <ul id="lista" class="space-y-3"></ul>
+    </div>
+
+    <script>
+        const iconMap = { comida: '🍔', alquiler: '🏠', expensas: '🏢', telefono: '📱', sueldo: '💰', otros: '📦' };
+        let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v6')) || [];
+        let presupuestoDinamico = parseFloat(localStorage.getItem('presupuesto_gasti')) || 1200000;
+
+        function actualizar() {
+            const lista = document.getElementById('lista');
+            const balanceElt = document.getElementById('balance');
+            const gastoMesElt = document.getElementById('gasto-mes-texto');
+            const labelPresu = document.getElementById('label-presupuesto');
+            const barra = document.getElementById('barra-progreso');
+            const porcElt = document.getElementById('porcentaje');
+            
+            const hoy = new Date();
+            const mesActual = hoy.getMonth();
+            const anioActual = hoy.getFullYear();
+
+            lista.innerHTML = '';
+            let balance = 0;
+            let gastoMes = 0;
+
+            movimientos.slice().reverse().forEach((m) => {
+                const fechaM = new Date(m.fecha);
+                const esIngreso = m.tipo === 'ingreso';
+                const montoNum = parseFloat(m.monto);
+
+                balance += esIngreso ? montoNum : -montoNum;
+
+                if (!esIngreso && fechaM.getMonth() === mesActual && fechaM.getFullYear() === anioActual) {
+                    gastoMes += montoNum;
+                }
+                
+                lista.innerHTML += `
+                    <li class="flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-slate-900 w-12 h-12 flex items-center justify-center rounded-xl text-2xl border border-slate-700">${iconMap[m.cat] || '📦'}</div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-200">${m.desc}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">${fechaM.toLocaleDateString('es-AR')}</p>
+                            </div>
+                        </div>
+                        <span class="${esIngreso ? 'text-emerald-400' : 'text-rose-400'} font-black text-lg">
+                            ${esIngreso ? '+' : '-'}$${montoNum.toLocaleString()}
+                        </span>
+                    </li>`;
+            });
+
+            balanceElt.innerText = `$ ${balance.toLocaleString()}`;
+            gastoMesElt.innerText = `Gastos Mes: $${gastoMes.toLocaleString()}`;
+            labelPresu.innerText = `Límite: $${presupuestoDinamico.toLocaleString()}`;
+            
+            let porc = (gastoMes / presupuestoDinamico) * 100;
+            if (porc > 100) porc = 100;
+            barra.style.width = porc + '%';
+            porcElt.innerText = Math.round(porc) + '%';
+            
+            if(porc > 85) barra.className = "bg-rose-500 h-3 rounded-full transition-all duration-500";
+            else if(porc > 50) barra.className = "bg-orange-400 h-3 rounded-full transition-all duration-500";
+            else barra.className = "bg-blue-500 h-3 rounded-full transition-all duration-500";
+
+            localStorage.setItem('finanzas_gasti_v6', JSON.stringify(movimientos));
+            localStorage.setItem('presupuesto_gasti', presupuestoDinamico);
+        }
+
+        function agregar(tipo) {
+            const desc = document.getElementById('desc').value;
+            const monto = document.getElementById('monto').value;
+            const cat = document.getElementById('cat').value;
+            
+            if(desc && monto) {
+                const montoNum = parseFloat(monto);
+                if (tipo === 'ingreso' && cat === 'sueldo') {
+                    presupuestoDinamico = montoNum;
+                }
+                movimientos.push({ desc, monto: montoNum, tipo, cat, fecha: new Date().toISOString() });
+                document.getElementById('desc').value = '';
+                document.getElementById('monto').value = '';
+                actualizar();
+            }
+        }
+
+        function exportarWA() {
+            let texto = "*Resumen Mis Finanzas*%0A%0A";
+            movimientos.slice(-5).forEach(m => {
+                const icono = iconMap[m.cat] || '📦';
+                const signo = m.tipo === 'ingreso' ? '✅' : '❌';
+                texto += `${signo} ${icono} ${m.desc}: $${m.monto}%0A`;
+            });
+            window.open(`https://wa.me/?text=${texto}`);
+        }
+
+        function borrarTodo() {
+            if(confirm('¿Reiniciar todo?')) {
+                movimientos = [];
+                presupuestoDinamico = 1200000;
+                actualizar();
+            }
+        }
+        actualizar();
+    </script>
+</body>
+</html>
