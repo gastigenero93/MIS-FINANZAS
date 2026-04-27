@@ -3,48 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas PRO Gastón</title>
+    <title>Finanzas Gasti PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-sans">
-    <div class="max-w-md mx-auto p-5 pb-24">
+<body class="bg-[#0f172a] text-slate-200 font-sans"> <div class="max-w-md mx-auto p-5 pb-24">
         
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-extrabold tracking-tight">Balance</h1>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance</h1>
             <div class="flex gap-2">
-                <button onclick="exportarWA()" class="bg-emerald-100 p-2 rounded-xl">📲</button>
-                <button onclick="borrarTodo()" class="bg-rose-100 p-2 rounded-xl text-rose-600">🗑️</button>
+                <button onclick="exportarWA()" class="bg-emerald-900/30 p-2 rounded-xl border border-emerald-500/30">📲</button>
+                <button onclick="borrarTodo()" class="bg-rose-900/30 p-2 rounded-xl text-rose-400 border border-rose-500/30">🗑️</button>
             </div>
         </div>
 
-        <div class="bg-slate-900 rounded-[2rem] p-7 text-white shadow-2xl mb-8 relative overflow-hidden">
+        <div class="bg-slate-800 rounded-[2rem] p-7 text-white shadow-2xl mb-8 border border-slate-700 relative overflow-hidden">
             <div class="relative z-10">
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Disponible Total</p>
-                <h2 id="balance" class="text-4xl font-bold mb-6">$ 0</h2>
+                <h2 id="balance" class="text-4xl font-bold mb-6 text-yellow-400">$ 0</h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <div class="flex justify-between text-xs mb-2">
-                            <span class="text-slate-400">Gasto Mensual</span>
-                            <span id="porcentaje" class="font-bold text-blue-400">0%</span>
+                        <div class="flex justify-between text-[10px] mb-2">
+                            <span id="label-presupuesto" class="text-slate-400 uppercase font-bold tracking-tighter">Límite: $1.200.000</span>
+                            <span id="porcentaje" class="font-bold text-blue-400 text-xs">0%</span>
                         </div>
-                        <div class="w-full bg-slate-800 h-3 rounded-full">
+                        <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
                             <div id="barra-progreso" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
         </div>
 
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8">
+        <div class="bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-700 mb-8">
             <div class="grid grid-cols-1 gap-4">
-                <input id="desc" type="text" placeholder="¿En qué?" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none text-lg">
+                <input id="desc" type="text" placeholder="¿Qué es?" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-blue-500">
                 <div class="flex gap-2">
-                    <input id="monto" type="number" placeholder="Monto $" class="flex-1 p-4 bg-slate-50 border-none rounded-2xl outline-none text-lg">
-                    <select id="cat" class="bg-slate-100 px-4 rounded-2xl text-2xl">
+                    <input id="monto" type="number" placeholder="Monto $" class="flex-1 p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-blue-500">
+                    <select id="cat" class="bg-slate-700 px-4 rounded-2xl text-2xl border border-slate-600">
                         <option value="comida">🍔</option>
                         <option value="alquiler">🏠</option>
                         <option value="expensas">🏢</option>
@@ -54,28 +52,31 @@
                     </select>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button onclick="agregar('ingreso')" class="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-emerald-200/50">Ingreso</button>
-                    <button onclick="agregar('gasto')" class="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-slate-300">Gasto</button>
+                    <button onclick="agregar('ingreso')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-emerald-900/20">Ingreso</button>
+                    <button onclick="agregar('gasto')" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-rose-900/20">Gasto</button>
                 </div>
             </div>
         </div>
 
         <div class="flex justify-between items-end mb-4 px-2">
-            <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Movimientos</h3>
-            <span id="gasto-mes-texto" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">Mes: $0</span>
+            <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest">Movimientos</h3>
+            <span id="gasto-mes-texto" class="text-xs font-bold text-slate-300 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">Mes: $0</span>
         </div>
         <ul id="lista" class="space-y-3"></ul>
     </div>
 
     <script>
         const iconMap = { comida: '🍔', alquiler: '🏠', expensas: '🏢', telefono: '📱', sueldo: '💰', otros: '📦' };
-        let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v4')) || [];
-        const PRESUPUESTO_LIMITE = 500000; // Podés cambiar este número a tu gusto
+        let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v5')) || [];
+        
+        // El presupuesto ahora se guarda para que no se resetee
+        let presupuestoDinamico = parseFloat(localStorage.getItem('presupuesto_gasti')) || 1200000;
 
         function actualizar() {
             const lista = document.getElementById('lista');
             const balanceElt = document.getElementById('balance');
             const gastoMesElt = document.getElementById('gasto-mes-texto');
+            const labelPresu = document.getElementById('label-presupuesto');
             const barra = document.getElementById('barra-progreso');
             const porcElt = document.getElementById('porcentaje');
             
@@ -87,6 +88,9 @@
             let balance = 0;
             let gastoMes = 0;
             
+            // Si el mes cambió, podrías resetear el presupuesto dinámico aquí si quisieras, 
+            // pero por ahora mantenemos el último sueldo ingresado.
+
             movimientos.slice().reverse().forEach((m) => {
                 const fechaM = new Date(m.fecha);
                 const esIngreso = m.tipo === 'ingreso';
@@ -99,43 +103,51 @@
                 }
                 
                 lista.innerHTML += `
-                    <li class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm border border-slate-50 transition-all active:scale-[0.98]">
+                    <li class="flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700 transition-all active:scale-[0.98]">
                         <div class="flex items-center gap-4">
-                            <div class="bg-slate-50 w-12 h-12 flex items-center justify-center rounded-xl text-2xl">${iconMap[m.cat] || '📦'}</div>
+                            <div class="bg-slate-900 w-12 h-12 flex items-center justify-center rounded-xl text-2xl border border-slate-700">${iconMap[m.cat] || '📦'}</div>
                             <div>
-                                <p class="text-sm font-bold text-slate-800">${m.desc}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase">${fechaM.toLocaleDateString('es-AR')}</p>
+                                <p class="text-sm font-bold text-slate-200">${m.desc}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">${fechaM.toLocaleDateString('es-AR')}</p>
                             </div>
                         </div>
-                        <span class="${esIngreso ? 'text-emerald-500' : 'text-rose-500'} font-black text-lg">
+                        <span class="${esIngreso ? 'text-emerald-400' : 'text-rose-400'} font-black text-lg">
                             ${esIngreso ? '+' : '-'}$${montoNum.toLocaleString()}
                         </span>
                     </li>`;
             });
 
-            // Actualizar Balance y Barra
             balanceElt.innerText = `$ ${balance.toLocaleString()}`;
             gastoMesElt.innerText = `Gastos Mes: $${gastoMes.toLocaleString()}`;
+            labelPresu.innerText = `Límite (Sueldo): $${presupuestoDinamico.toLocaleString()}`;
             
-            let porc = (gastoMes / PRESUPUESTO_LIMITE) * 100;
+            let porc = (gastoMes / presupuestoDinamico) * 100;
             if (porc > 100) porc = 100;
             barra.style.width = porc + '%';
-            porcElt.innerText = Math.round(porc) + '% del límite';
+            porcElt.innerText = Math.round(porc) + '%';
             
-            // Cambiar color de barra según gasto
-            if(porc > 80) barra.className = "bg-rose-500 h-3 rounded-full transition-all duration-500";
+            if(porc > 85) barra.className = "bg-rose-500 h-3 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]";
             else if(porc > 50) barra.className = "bg-orange-400 h-3 rounded-full transition-all duration-500";
-            else barra.className = "bg-blue-500 h-3 rounded-full transition-all duration-500";
+            else barra.className = "bg-blue-500 h-3 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]";
 
-            localStorage.setItem('finanzas_gasti_v4', JSON.stringify(movimientos));
+            localStorage.setItem('finanzas_gasti_v5', JSON.stringify(movimientos));
+            localStorage.setItem('presupuesto_gasti', presupuestoDinamico);
         }
 
         function agregar(tipo) {
             const desc = document.getElementById('desc').value;
             const monto = document.getElementById('monto').value;
             const cat = document.getElementById('cat').value;
+            
             if(desc && monto) {
-                movimientos.push({ desc, monto, tipo, cat, fecha: new Date().toISOString() });
+                const montoNum = parseFloat(monto);
+                
+                // Si es un ingreso y la categoría es SUELDO, actualizamos el presupuesto del mes
+                if (tipo === 'ingreso' && cat === 'sueldo') {
+                    presupuestoDinamico = montoNum;
+                }
+
+                movimientos.push({ desc, monto: montoNum, tipo, cat, fecha: new Date().toISOString() });
                 document.getElementById('desc').value = '';
                 document.getElementById('monto').value = '';
                 actualizar();
@@ -143,8 +155,8 @@
         }
 
         function exportarWA() {
-            let texto = "*Resumen de Mis Finanzas*%0A%0A";
-            movimientos.forEach(m => {
+            let texto = "*Resumen Mis Finanzas Gasti*%0A%0A";
+            movimientos.slice(-5).forEach(m => {
                 const icono = iconMap[m.cat] || '📦';
                 const signo = m.tipo === 'ingreso' ? '✅' : '❌';
                 texto += `${signo} ${icono} ${m.desc}: $${m.monto}%0A`;
@@ -153,8 +165,9 @@
         }
 
         function borrarTodo() {
-            if(confirm('¿Deseas resetear todo el historial?')) {
+            if(confirm('¿Reiniciar todo?')) {
                 movimientos = [];
+                presupuestoDinamico = 1200000;
                 actualizar();
             }
         }
