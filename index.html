@@ -3,294 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finanzas Gasti</title>
+<title>FinanzasPro</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Ícono PNG generado por canvas (funciona en Safari iOS) -->
 <script>
 (function(){
   var c = document.createElement('canvas');
   c.width = c.height = 512;
   var x = c.getContext('2d');
-  // Fondo verde fluor redondeado
-  x.fillStyle = '#00ff88';
-  x.beginPath();
-  x.roundRect(0, 0, 512, 512, 90);
-  x.fill();
-  // Símbolo $ negro bold
-  x.fillStyle = '#000';
-  x.font = 'bold 340px Arial';
-  x.textAlign = 'center';
-  x.textBaseline = 'middle';
-  x.fillText('$', 256, 275);
+  var g = x.createLinearGradient(0,0,512,512);
+  g.addColorStop(0,'#00ff88'); g.addColorStop(1,'#00cc66');
+  x.fillStyle = g;
+  x.beginPath(); x.roundRect(0,0,512,512,100); x.fill();
+  x.fillStyle = '#0f172a';
+  x.font = 'bold 360px Arial';
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText('$',256,285);
   var url = c.toDataURL('image/png');
-  // Apple Touch Icon — debe ir ANTES que cualquier otro link de ícono
-  var l = document.createElement('link');
-  l.rel = 'apple-touch-icon'; l.href = url;
-  document.head.prepend(l);
-  // Favicon
-  var f = document.createElement('link');
-  f.rel = 'icon'; f.type = 'image/png'; f.href = url;
-  document.head.appendChild(f);
-  // Manifest PWA dinámico
-  var manifest = {
-    name: 'Finanzas Gasti', short_name: 'Finanzas Gasti',
-    start_url: '.', display: 'standalone',
-    background_color: '#0f172a', theme_color: '#00ff88',
-    icons: [{ src: url, sizes: '512x512', type: 'image/png' }]
-  };
-  var ml = document.createElement('link');
-  ml.rel = 'manifest';
-  ml.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
-  document.head.appendChild(ml);
+  var l = document.createElement('link'); l.rel='apple-touch-icon'; l.href=url; document.head.prepend(l);
+  var f = document.createElement('link'); f.rel='icon'; f.type='image/png'; f.href=url; document.head.appendChild(f);
+  var m = {name:'FinanzasPro',short_name:'FinanzasPro',start_url:'.',display:'standalone',background_color:'#0f172a',theme_color:'#00ff88',icons:[{src:url,sizes:'512x512',type:'image/png'}]};
+  var ml = document.createElement('link'); ml.rel='manifest'; ml.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'})); document.head.appendChild(ml);
 })();
 </script>
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Finanzas Gasti">
+<meta name="apple-mobile-web-app-title" content="FinanzasPro">
 <meta name="theme-color" content="#00ff88">
-
 <style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  select option { background: #1e293b; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  select option{background:#1e293b}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+  .modal-box{background:#1e293b;border-radius:2rem 2rem 0 0;padding:2rem;width:100%;max-width:480px;border-top:2px solid #334155}
+  .tab-btn{flex:1;padding:10px 4px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;background:transparent;color:#64748b}
+  .tab-btn.active{background:#00ff88;color:#0f172a}
+  .cat-chip{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:14px;border:2px solid transparent;cursor:pointer;background:#0f172a;transition:all .2s;min-width:58px}
+  .cat-chip.selected{border-color:#00ff88;background:#00ff8820}
+  .cat-chip span.emoji{font-size:24px}
+  .cat-chip span.lbl{font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;text-align:center}
 </style>
 </head>
-
 <body class="bg-[#0f172a] text-slate-200">
-<div class="max-w-md mx-auto p-5 pb-28">
+
+<!-- MODAL COMPARTIR -->
+<div id="modal-compartir" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-extrabold text-white">Compartir FinanzasPro</h2>
+      <button onclick="cerrarModal()" class="text-slate-400 text-2xl font-bold">✕</button>
+    </div>
+    <p class="text-slate-400 text-sm mb-4">Enviá este mensaje a tus conocidos para que instalen la app:</p>
+    <div class="bg-slate-900 rounded-2xl p-4 border border-slate-700 text-sm text-slate-300 leading-relaxed mb-4" id="texto-compartir">
+      💸 <strong>FinanzasPro</strong> — La app para controlar tus finanzas personales.<br><br>
+      📲 <strong>Cómo instalarla en tu iPhone:</strong><br>
+      1️⃣ Abrí este link en <strong>Safari</strong>: <span id="link-app" class="text-[#00ff88] font-bold break-all"></span><br>
+      2️⃣ Tocá el botón <strong>Compartir ↑</strong><br>
+      3️⃣ Elegí <strong>"Agregar a pantalla de inicio"</strong><br>
+      4️⃣ ¡Listo! Ya tenés FinanzasPro como app 🎉
+    </div>
+    <button onclick="compartir()" class="w-full py-4 rounded-2xl font-bold text-[#0f172a] text-lg active:scale-95 transition-all mb-3" style="background:#00ff88">
+      📤 Compartir por WhatsApp / Mail
+    </button>
+    <button onclick="copiarLink()" class="w-full py-4 rounded-2xl font-bold text-slate-300 text-base active:scale-95 transition-all bg-slate-700">
+      📋 Copiar link
+    </button>
+  </div>
+</div>
+
+<!-- MODAL INSTRUCCIONES INSTALAR -->
+<div id="modal-instalar" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="text-xl font-extrabold text-white">Instalar como App</h2>
+      <button onclick="document.getElementById('modal-instalar').style.display='none'" class="text-slate-400 text-2xl font-bold">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div class="flex gap-4 items-start"><span class="text-2xl">1️⃣</span><p class="text-slate-300 text-sm">Abrí este sitio en <strong class="text-white">Safari</strong> (no en Chrome ni otro navegador)</p></div>
+      <div class="flex gap-4 items-start"><span class="text-2xl">2️⃣</span><p class="text-slate-300 text-sm">Tocá el botón <strong class="text-white">Compartir ↑</strong> en la barra de Safari</p></div>
+      <div class="flex gap-4 items-start"><span class="text-2xl">3️⃣</span><p class="text-slate-300 text-sm">Seleccioná <strong class="text-white">"Agregar a pantalla de inicio"</strong></p></div>
+      <div class="flex gap-4 items-start"><span class="text-2xl">4️⃣</span><p class="text-slate-300 text-sm">Tocá <strong class="text-white">Agregar</strong> — ¡ya está instalada con ícono verde!</p></div>
+    </div>
+    <button onclick="document.getElementById('modal-instalar').style.display='none'" class="w-full mt-6 py-4 rounded-2xl font-bold text-[#0f172a] text-lg" style="background:#00ff88">Entendido ✓</button>
+  </div>
+</div>
+
+<div class="max-w-md mx-auto p-5 pb-32">
 
   <!-- Header -->
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance <span style="color:#00ff88">Gasti</span></h1>
-    <button onclick="borrarTodo()" class="bg-rose-900/30 p-3 rounded-xl text-rose-400 border border-rose-500/30 text-lg">🗑️</button>
+  <div class="flex justify-between items-center mb-5">
+    <div>
+      <p class="text-[#00ff88] text-xs font-bold uppercase tracking-widest">Panel Financiero</p>
+      <h1 class="text-2xl font-extrabold text-white">FinanzasPro 💼</h1>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="document.getElementById('modal-instalar').style.display='flex'" class="bg-slate-800 p-3 rounded-xl text-slate-300 border border-slate-700 text-lg" title="Instalar">📲</button>
+      <button onclick="abrirCompartir()" class="p-3 rounded-xl text-[#0f172a] border border-[#00cc66] text-lg font-bold" style="background:#00ff88" title="Compartir">📤</button>
+      <button onclick="borrarTodo()" class="bg-rose-900/30 p-3 rounded-xl text-rose-400 border border-rose-500/30 text-lg" title="Borrar todo">🗑️</button>
+    </div>
   </div>
 
-  <!-- Card saldo -->
-  <div class="bg-slate-800 rounded-[2rem] p-7 text-white shadow-2xl mb-6 border border-slate-700">
-    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Disponible Real</p>
-    <h2 id="balance" class="text-4xl font-bold mb-1" style="color:#00ff88">$ 0</h2>
-    <div class="flex gap-6 mb-5 mt-2">
-      <div>
-        <p class="text-slate-500 text-xs uppercase tracking-wider">Ingresos mes</p>
-        <p id="total-ingresos" class="text-emerald-400 font-bold text-lg">$ 0</p>
+  <!-- Card balance -->
+  <div class="bg-slate-800 rounded-[2rem] p-6 shadow-2xl mb-5 border border-slate-700">
+    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Saldo Disponible</p>
+    <h2 id="balance" class="text-5xl font-black mb-4" style="color:#00ff88">$ 0</h2>
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="bg-emerald-900/30 rounded-2xl p-3 border border-emerald-500/20">
+        <p class="text-emerald-400 text-xs uppercase font-bold tracking-wider mb-1">💰 Ingresos del mes</p>
+        <p id="total-ingresos" class="text-emerald-300 font-black text-xl">$ 0</p>
       </div>
-      <div>
-        <p class="text-slate-500 text-xs uppercase tracking-wider">Gastos mes</p>
-        <p id="total-gastos" class="text-rose-400 font-bold text-lg">$ 0</p>
+      <div class="bg-rose-900/30 rounded-2xl p-3 border border-rose-500/20">
+        <p class="text-rose-400 text-xs uppercase font-bold tracking-wider mb-1">💸 Gastos del mes</p>
+        <p id="total-gastos" class="text-rose-300 font-black text-xl">$ 0</p>
       </div>
     </div>
-    <div class="flex justify-between text-[10px] mb-2">
-      <span class="text-slate-400 uppercase font-bold tracking-tighter">Gasto / Ingreso del mes</span>
-      <span id="porcentaje" class="font-bold text-xs" style="color:#00ff88">0%</span>
+    <div class="flex justify-between text-xs mb-2">
+      <span class="text-slate-400 font-bold uppercase tracking-tight">Consumido del ingreso</span>
+      <span id="porcentaje" class="font-black" style="color:#00ff88">0%</span>
     </div>
-    <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
-      <div id="barra" class="h-3 rounded-full transition-all duration-500" style="width:0%;background:#00ff88"></div>
+    <div class="w-full bg-slate-900 h-4 rounded-full border border-slate-700 overflow-hidden">
+      <div id="barra" class="h-4 rounded-full transition-all duration-700" style="width:0%;background:#00ff88"></div>
     </div>
   </div>
 
   <!-- Filtro mes -->
   <select id="filtro-mes" onchange="actualizar()"
-    class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none mb-5 font-bold">
+    class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none mb-5 font-bold text-sm">
   </select>
 
-  <!-- Formulario -->
-  <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700 mb-6 shadow-xl">
-    <div class="grid gap-3">
-      <input id="desc" type="text" placeholder="¿Qué es? (ej: Alquiler Mayo)"
-        class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors">
-      <div class="flex gap-2">
-        <input id="monto" type="number" placeholder="Monto $"
-          class="flex-1 p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors">
-        <select id="cat" class="bg-slate-700 px-4 rounded-2xl text-2xl border border-slate-600 outline-none">
-          <option value="comida">🍔</option>
-          <option value="alquiler">🏠</option>
-          <option value="expensas">🏢</option>
-          <option value="telefono">📱</option>
-          <option value="cuotas">💳</option>
-          <option value="sueldo">💰</option>
-          <option value="transporte">🚌</option>
-          <option value="salud">❤️‍🩹</option>
-          <option value="otros">📦</option>
-        </select>
+  <!-- Tabs -->
+  <div class="flex gap-1 bg-slate-800 rounded-2xl p-1 mb-5 border border-slate-700">
+    <button class="tab-btn active" onclick="setTab('cargar',this)">➕ Cargar</button>
+    <button class="tab-btn" onclick="setTab('movimientos',this)">📋 Movimientos</button>
+    <button class="tab-btn" onclick="setTab('resumen',this)">📊 Resumen</button>
+  </div>
+
+  <!-- TAB: CARGAR -->
+  <div id="tab-cargar">
+    <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700 shadow-xl">
+      <!-- Toggle Ingreso/Gasto -->
+      <div class="flex gap-2 bg-slate-900 rounded-2xl p-1 mb-4">
+        <button id="btn-ingreso" onclick="setTipo('ingreso')"
+          class="flex-1 py-3 rounded-xl font-black text-sm transition-all text-slate-400">
+          💰 Ingreso
+        </button>
+        <button id="btn-gasto" onclick="setTipo('gasto')"
+          class="flex-1 py-3 rounded-xl font-black text-sm transition-all text-[#0f172a]"
+          style="background:#00ff88">
+          💸 Gasto
+        </button>
       </div>
-      <div class="flex gap-3">
-        <button onclick="agregar('ingreso')"
-          class="flex-1 font-bold py-4 rounded-2xl active:scale-95 transition-all text-lg text-black"
-          style="background:#00ff88">+ Ingreso</button>
-        <button onclick="agregar('gasto')"
-          class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all text-lg">
-          − Gasto</button>
-      </div>
+
+      <input id="desc" type="text" placeholder="Descripción (ej: Alquiler Mayo)"
+        class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors mb-3 text-sm">
+
+      <input id="monto" type="number" placeholder="Monto $"
+        class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors mb-4 text-lg font-bold">
+
+      <!-- Grilla de categorías -->
+      <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3">Categoría</p>
+      <div id="cat-grid" class="flex flex-wrap gap-2 mb-5"></div>
+
+      <button id="btn-agregar" onclick="agregar()"
+        class="w-full py-4 rounded-2xl font-black text-[#0f172a] text-lg active:scale-95 transition-all"
+        style="background:#00ff88">
+        + Agregar Gasto
+      </button>
     </div>
   </div>
 
-  <!-- Botón exportar Excel -->
-  <button onclick="exportarExcel()"
-    class="w-full mb-6 py-4 rounded-2xl font-bold text-black text-lg active:scale-95 transition-all border-2 flex items-center justify-center gap-2"
-    style="background:#00ff88;border-color:#00cc66">
-    📊 Exportar a Excel (.csv)
-  </button>
+  <!-- TAB: MOVIMIENTOS -->
+  <div id="tab-movimientos" style="display:none">
+    <div class="flex gap-2 flex-wrap mb-4">
+      <button onclick="setFiltroTipo('todos',this)" class="filtro-tipo-btn px-4 py-2 rounded-xl text-xs font-bold bg-[#00ff88] text-[#0f172a] border-2 border-[#00ff88]">Todos</button>
+      <button onclick="setFiltroTipo('ingreso',this)" class="filtro-tipo-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border-2 border-slate-700">💰 Ingresos</button>
+      <button onclick="setFiltroTipo('gasto',this)" class="filtro-tipo-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border-2 border-slate-700">💸 Gastos</button>
+    </div>
+    <ul id="lista" class="space-y-3"></ul>
+    <button onclick="exportarExcel()"
+      class="w-full mt-5 py-4 rounded-2xl font-bold text-[#0f172a] text-base active:scale-95 transition-all flex items-center justify-center gap-2"
+      style="background:#00ff88">
+      📊 Exportar a Excel (.csv)
+    </button>
+  </div>
 
-  <!-- Lista -->
-  <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 px-1">Movimientos del mes</h3>
-  <ul id="lista" class="space-y-3"></ul>
+  <!-- TAB: RESUMEN -->
+  <div id="tab-resumen" style="display:none">
+    <div id="resumen-cats" class="space-y-3"></div>
+  </div>
 
 </div>
 
 <script>
-const iconMap = { comida:'🍔', alquiler:'🏠', expensas:'🏢', telefono:'📱', cuotas:'💳', sueldo:'💰', transporte:'🚌', salud:'❤️‍🩹', otros:'📦' };
-const KEY = 'finanzas_gasti_v3';
-let movimientos = JSON.parse(localStorage.getItem(KEY)) || [];
+// ── Categorías ───────────────────────────────────────────────────────────────
+const CATS = [
+  {v:'alquiler',e:'🏠',l:'Alquiler'},
+  {v:'expensas',e:'🏢',l:'Expensas'},
+  {v:'comida',e:'🍔',l:'Comida'},
+  {v:'supermercado',e:'🛒',l:'Super'},
+  {v:'sueldo',e:'💰',l:'Sueldo'},
+  {v:'freelance',e:'💻',l:'Freelance'},
+  {v:'telefono',e:'📱',l:'Teléfono'},
+  {v:'internet',e:'🌐',l:'Internet'},
+  {v:'cuotas',e:'💳',l:'Cuotas'},
+  {v:'transporte',e:'🚌',l:'Transporte'},
+  {v:'nafta',e:'⛽',l:'Nafta'},
+  {v:'auto',e:'🚗',l:'Auto'},
+  {v:'salud',e:'🏥',l:'Salud'},
+  {v:'farmacia',e:'💊',l:'Farmacia'},
+  {v:'gym',e:'💪',l:'Gym'},
+  {v:'ropa',e:'👕',l:'Ropa'},
+  {v:'electronica',e:'🖥️',l:'Electrónica'},
+  {v:'hogar',e:'🛋️',l:'Hogar'},
+  {v:'educacion',e:'📚',l:'Educación'},
+  {v:'entretenimiento',e:'🎬',l:'Entret.'},
+  {v:'restaurante',e:'🍽️',l:'Restau.'},
+  {v:'cafe',e:'☕',l:'Café'},
+  {v:'delivery',e:'🛵',l:'Delivery'},
+  {v:'viaje',e:'✈️',l:'Viaje'},
+  {v:'mascota',e:'🐾',l:'Mascota'},
+  {v:'regalo',e:'🎁',l:'Regalo'},
+  {v:'ahorro',e:'🏦',l:'Ahorro'},
+  {v:'inversion',e:'📈',l:'Inversión'},
+  {v:'otros',e:'📦',l:'Otros'},
+];
+const catMap = Object.fromEntries(CATS.map(c=>[c.v,c]));
 
-function guardar() {
-  localStorage.setItem(KEY, JSON.stringify(movimientos));
+// ── Estado ───────────────────────────────────────────────────────────────────
+const KEY = 'finanzaspro_v1';
+let movimientos = JSON.parse(localStorage.getItem(KEY)) || [];
+let tipoActual = 'gasto';
+let catActual = 'comida';
+let filtroTipoActual = 'todos';
+let tabActual = 'cargar';
+
+// ── Init categorías UI ───────────────────────────────────────────────────────
+function buildCatGrid() {
+  var grid = document.getElementById('cat-grid');
+  grid.innerHTML = '';
+  CATS.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'cat-chip' + (c.v === catActual ? ' selected' : '');
+    div.onclick = function(){ catActual = c.v; buildCatGrid(); };
+    div.innerHTML = '<span class="emoji">' + c.e + '</span><span class="lbl">' + c.l + '</span>';
+    grid.appendChild(div);
+  });
 }
 
+// ── Tipo ingreso/gasto ───────────────────────────────────────────────────────
+function setTipo(t) {
+  tipoActual = t;
+  var bi = document.getElementById('btn-ingreso');
+  var bg = document.getElementById('btn-gasto');
+  var ba = document.getElementById('btn-agregar');
+  if (t === 'ingreso') {
+    bi.style.background = '#00ff88'; bi.style.color = '#0f172a';
+    bg.style.background = ''; bg.style.color = '#94a3b8';
+    ba.textContent = '+ Agregar Ingreso';
+    // Auto-seleccionar sueldo
+    catActual = 'sueldo'; buildCatGrid();
+  } else {
+    bg.style.background = '#00ff88'; bg.style.color = '#0f172a';
+    bi.style.background = ''; bi.style.color = '#94a3b8';
+    ba.textContent = '+ Agregar Gasto';
+    catActual = 'comida'; buildCatGrid();
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function setTab(tab, btn) {
+  tabActual = tab;
+  ['cargar','movimientos','resumen'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  if (tab === 'movimientos') renderLista();
+  if (tab === 'resumen') renderResumen();
+}
+
+// ── Filtro tipo (movimientos) ────────────────────────────────────────────────
+function setFiltroTipo(t, btn) {
+  filtroTipoActual = t;
+  document.querySelectorAll('.filtro-tipo-btn').forEach(function(b){
+    b.style.background='#1e293b'; b.style.color='#cbd5e1'; b.style.borderColor='#334155';
+  });
+  btn.style.background='#00ff88'; btn.style.color='#0f172a'; btn.style.borderColor='#00ff88';
+  renderLista();
+}
+
+// ── Mes helpers ──────────────────────────────────────────────────────────────
 function mesKey(fecha) {
   var f = new Date(fecha);
   return f.getFullYear() + '-' + String(f.getMonth()).padStart(2,'0');
 }
-
 function mesLabel(key) {
-  var parts = key.split('-');
-  var f = new Date(parseInt(parts[0]), parseInt(parts[1]));
-  return f.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }).toUpperCase();
+  var p = key.split('-');
+  return new Date(parseInt(p[0]), parseInt(p[1])).toLocaleDateString('es-AR',{month:'long',year:'numeric'}).toUpperCase();
+}
+function getMesFiltro() {
+  var sel = document.getElementById('filtro-mes');
+  return sel.value || mesKey(new Date());
 }
 
+// ── Filtro mes ───────────────────────────────────────────────────────────────
 function initFiltro() {
   var sel = document.getElementById('filtro-mes');
   var actual = mesKey(new Date());
-  var meses = [...new Set(movimientos.map(m => mesKey(m.fecha)))];
+  var meses = [...new Set(movimientos.map(function(m){ return mesKey(m.fecha); }))];
   if (!meses.includes(actual)) meses.push(actual);
-  meses.sort((a,b) => b.localeCompare(a)); // más reciente primero
+  meses.sort(function(a,b){ return b.localeCompare(a); });
   var prev = sel.value || actual;
-  sel.innerHTML = meses.map(m =>
-    '<option value="' + m + '"' + (m === prev ? ' selected' : '') + '>' + mesLabel(m) + '</option>'
-  ).join('');
+  if (!meses.includes(prev)) prev = actual;
+  sel.innerHTML = meses.map(function(m){
+    return '<option value="'+m+'"'+(m===prev?' selected':'')+'>'+mesLabel(m)+'</option>';
+  }).join('');
 }
 
+// ── Actualizar card superior ─────────────────────────────────────────────────
 function actualizar() {
-  var sel = document.getElementById('filtro-mes');
-  var filtro = sel.value || mesKey(new Date());
-  var lista = document.getElementById('lista');
-  var balanceElt = document.getElementById('balance');
-  var barra = document.getElementById('barra');
-  var porcElt = document.getElementById('porcentaje');
-
-  lista.innerHTML = '';
-  var balanceTotal = 0;
-  var ingresosMes = 0;
-  var gastosMes = 0;
-  var itemsMes = [];
-
-  movimientos.forEach(function(m) {
-    var esIngreso = m.tipo === 'ingreso';
+  var filtro = getMesFiltro();
+  var balanceTotal = 0, ingresosMes = 0, gastosMes = 0;
+  movimientos.forEach(function(m){
+    var esI = m.tipo === 'ingreso';
     var monto = parseFloat(m.monto);
-    balanceTotal += esIngreso ? monto : -monto;
+    balanceTotal += esI ? monto : -monto;
     if (mesKey(m.fecha) === filtro) {
-      if (esIngreso) ingresosMes += monto;
-      else gastosMes += monto;
-      itemsMes.push(m);
+      if (esI) ingresosMes += monto; else gastosMes += monto;
     }
   });
-
-  // Mostrar items del mes (más recientes primero)
-  itemsMes.slice().reverse().forEach(function(m) {
-    var esIngreso = m.tipo === 'ingreso';
-    var monto = parseFloat(m.monto);
-    var li = document.createElement('li');
-    li.className = 'flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700';
-    li.innerHTML =
-      '<div class="flex items-center gap-3">' +
-        '<div class="bg-slate-900 w-10 h-10 flex items-center justify-center rounded-xl text-xl border border-slate-700">' +
-          (iconMap[m.cat] || '📦') +
-        '</div>' +
-        '<div>' +
-          '<p class="text-sm font-bold text-slate-200">' + m.desc + '</p>' +
-          '<p class="text-xs text-slate-500">' + new Date(m.fecha).toLocaleDateString('es-AR') + '</p>' +
-        '</div>' +
-      '</div>' +
-      '<span class="font-black text-lg ' + (esIngreso ? 'text-emerald-400' : 'text-rose-400') + '">' +
-        (esIngreso ? '+' : '-') + '$ ' + monto.toLocaleString('es-AR') +
-      '</span>';
-    lista.appendChild(li);
-  });
-
-  if (itemsMes.length === 0) {
-    lista.innerHTML = '<li class="text-center text-slate-600 py-8 text-sm">Sin movimientos este mes</li>';
-  }
-
-  // Balance
-  balanceElt.innerText = '$ ' + balanceTotal.toLocaleString('es-AR');
-  balanceElt.style.color = balanceTotal >= 0 ? '#00ff88' : '#f87171';
-
-  // Totales mes
-  document.getElementById('total-ingresos').innerText = '$ ' + ingresosMes.toLocaleString('es-AR');
-  document.getElementById('total-gastos').innerText = '$ ' + gastosMes.toLocaleString('es-AR');
-
-  // Barra
-  var porc = ingresosMes > 0 ? (gastosMes / ingresosMes) * 100 : (gastosMes > 0 ? 100 : 0);
-  porc = Math.min(porc, 100);
+  var balElt = document.getElementById('balance');
+  balElt.textContent = '$ ' + balanceTotal.toLocaleString('es-AR');
+  balElt.style.color = balanceTotal >= 0 ? '#00ff88' : '#f87171';
+  document.getElementById('total-ingresos').textContent = '$ ' + ingresosMes.toLocaleString('es-AR');
+  document.getElementById('total-gastos').textContent = '$ ' + gastosMes.toLocaleString('es-AR');
+  var porc = ingresosMes > 0 ? Math.min((gastosMes/ingresosMes)*100,100) : (gastosMes>0?100:0);
+  var barra = document.getElementById('barra');
   barra.style.width = porc + '%';
-  porcElt.innerText = Math.round(porc) + '% del Ingreso';
-  if (porc > 90) { barra.style.background = '#f87171'; porcElt.style.color = '#f87171'; }
-  else if (porc > 70) { barra.style.background = '#fb923c'; porcElt.style.color = '#fb923c'; }
-  else { barra.style.background = '#00ff88'; porcElt.style.color = '#00ff88'; }
-
+  var porcElt = document.getElementById('porcentaje');
+  porcElt.textContent = Math.round(porc) + '% del Ingreso';
+  var color = porc > 90 ? '#f87171' : porc > 70 ? '#fb923c' : '#00ff88';
+  barra.style.background = color; porcElt.style.color = color;
   guardar();
+  if (tabActual === 'movimientos') renderLista();
+  if (tabActual === 'resumen') renderResumen();
 }
 
-function agregar(tipo) {
-  var desc = document.getElementById('desc').value.trim();
-  var monto = parseFloat(document.getElementById('monto').value);
-  var cat = document.getElementById('cat').value;
-  if (!desc || !monto || monto <= 0) {
-    alert('Completá la descripción y el monto 👆');
+// ── Render lista movimientos ─────────────────────────────────────────────────
+function renderLista() {
+  var filtro = getMesFiltro();
+  var lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  var items = movimientos.filter(function(m){
+    return mesKey(m.fecha) === filtro && (filtroTipoActual === 'todos' || m.tipo === filtroTipoActual);
+  }).slice().reverse();
+  if (items.length === 0) {
+    lista.innerHTML = '<li class="text-center text-slate-600 py-10 text-sm">Sin movimientos</li>';
     return;
   }
-  movimientos.push({ desc: desc, monto: monto, tipo: tipo, cat: cat, fecha: new Date().toISOString() });
+  items.forEach(function(m, idx) {
+    var esI = m.tipo === 'ingreso';
+    var cat = catMap[m.cat] || {e:'📦',l:'Otros'};
+    var li = document.createElement('li');
+    li.className = 'flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700 gap-2';
+    li.innerHTML =
+      '<div class="flex items-center gap-3 flex-1 min-w-0">' +
+        '<div class="bg-slate-900 w-11 h-11 flex items-center justify-center rounded-xl text-xl border border-slate-700 flex-shrink-0">' + cat.e + '</div>' +
+        '<div class="min-w-0">' +
+          '<p class="text-sm font-bold text-slate-200 truncate">' + m.desc + '</p>' +
+          '<p class="text-xs text-slate-500">' + cat.l + ' · ' + new Date(m.fecha).toLocaleDateString('es-AR') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-2 flex-shrink-0">' +
+        '<span class="font-black text-base ' + (esI?'text-emerald-400':'text-rose-400') + '">' +
+          (esI?'+':'-') + '$ ' + parseFloat(m.monto).toLocaleString('es-AR') +
+        '</span>' +
+        '<button onclick="eliminar('+m.id+')" class="text-slate-600 hover:text-rose-400 text-lg transition-colors">✕</button>' +
+      '</div>';
+    lista.appendChild(li);
+  });
+}
+
+// ── Render resumen por categoría ─────────────────────────────────────────────
+function renderResumen() {
+  var filtro = getMesFiltro();
+  var totCats = {};
+  var totalGastos = 0;
+  movimientos.filter(function(m){ return mesKey(m.fecha)===filtro && m.tipo==='gasto'; })
+    .forEach(function(m){
+      var monto = parseFloat(m.monto);
+      totCats[m.cat] = (totCats[m.cat]||0) + monto;
+      totalGastos += monto;
+    });
+  var res = document.getElementById('resumen-cats');
+  if (Object.keys(totCats).length === 0) {
+    res.innerHTML = '<p class="text-center text-slate-600 py-10 text-sm">Sin gastos este mes</p>';
+    return;
+  }
+  var sorted = Object.entries(totCats).sort(function(a,b){return b[1]-a[1];});
+  res.innerHTML = '<p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Gastos por categoría</p>';
+  sorted.forEach(function(entry){
+    var cat = catMap[entry[0]] || {e:'📦',l:'Otros'};
+    var porc = totalGastos > 0 ? (entry[1]/totalGastos)*100 : 0;
+    var div = document.createElement('div');
+    div.className = 'bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-3';
+    div.innerHTML =
+      '<div class="flex justify-between items-center mb-2">' +
+        '<div class="flex items-center gap-2"><span class="text-xl">' + cat.e + '</span><span class="font-bold text-sm">' + cat.l + '</span></div>' +
+        '<div class="text-right"><span class="font-black text-rose-300">$ ' + entry[1].toLocaleString('es-AR') + '</span>' +
+        '<span class="text-slate-500 text-xs ml-2">' + porc.toFixed(1) + '%</span></div>' +
+      '</div>' +
+      '<div class="w-full bg-slate-900 h-2 rounded-full">' +
+        '<div class="h-2 rounded-full transition-all duration-500" style="width:' + porc + '%;background:#00ff88"></div>' +
+      '</div>';
+    res.appendChild(div);
+  });
+}
+
+// ── Agregar ──────────────────────────────────────────────────────────────────
+function agregar() {
+  var desc = document.getElementById('desc').value.trim();
+  var monto = parseFloat(document.getElementById('monto').value);
+  if (!desc || !monto || monto <= 0) { alert('Completá la descripción y el monto 👆'); return; }
+  movimientos.push({ id: Date.now(), desc: desc, monto: monto, tipo: tipoActual, cat: catActual, fecha: new Date().toISOString() });
   document.getElementById('desc').value = '';
   document.getElementById('monto').value = '';
   initFiltro();
   actualizar();
+  // Feedback visual
+  var btn = document.getElementById('btn-agregar');
+  var orig = btn.textContent;
+  btn.textContent = '✓ Guardado!';
+  setTimeout(function(){ btn.textContent = orig; }, 1200);
 }
 
+// ── Eliminar ─────────────────────────────────────────────────────────────────
+function eliminar(id) {
+  movimientos = movimientos.filter(function(m){ return m.id !== id; });
+  initFiltro(); actualizar();
+}
+
+// ── Borrar todo ──────────────────────────────────────────────────────────────
 function borrarTodo() {
   if (confirm('¿Reiniciar todo el historial? Esta acción no se puede deshacer.')) {
-    movimientos = [];
-    localStorage.removeItem(KEY);
-    initFiltro();
-    actualizar();
+    movimientos = []; localStorage.removeItem(KEY);
+    initFiltro(); actualizar();
   }
 }
 
+// ── Exportar Excel ───────────────────────────────────────────────────────────
 function exportarExcel() {
   if (movimientos.length === 0) { alert('No hay movimientos para exportar.'); return; }
   var filas = [['Fecha','Tipo','Categoría','Descripción','Monto']];
-  movimientos.slice().sort((a,b) => new Date(a.fecha)-new Date(b.fecha)).forEach(function(m) {
-    filas.push([
-      new Date(m.fecha).toLocaleDateString('es-AR'),
-      m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto',
-      iconMap[m.cat] + ' ' + m.cat,
-      m.desc,
-      m.monto
-    ]);
-  });
-  // BOM para que Excel reconozca tildes y ñ
-  var csv = '\uFEFF' + filas.map(function(r) {
-    return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+  movimientos.slice().sort(function(a,b){ return new Date(a.fecha)-new Date(b.fecha); })
+    .forEach(function(m){
+      var cat = catMap[m.cat] || {e:'📦',l:'Otros'};
+      filas.push([
+        new Date(m.fecha).toLocaleDateString('es-AR'),
+        m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto',
+        cat.e + ' ' + cat.l,
+        m.desc,
+        m.monto
+      ]);
+    });
+  var csv = '\uFEFF' + filas.map(function(r){
+    return r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
   }).join('\n');
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'finanzas_gasti_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'FinanzasPro_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
 
-// Init
+// ── Compartir ────────────────────────────────────────────────────────────────
+function abrirCompartir() {
+  document.getElementById('link-app').textContent = window.location.href;
+  document.getElementById('modal-compartir').style.display = 'flex';
+}
+function cerrarModal() {
+  document.getElementById('modal-compartir').style.display = 'none';
+}
+function compartir() {
+  var url = window.location.href;
+  var texto = '💸 FinanzasPro — La app para controlar tus finanzas personales.\n\n📲 Cómo instalarla en tu iPhone:\n1️⃣ Abrí este link en Safari: ' + url + '\n2️⃣ Tocá el botón Compartir ↑\n3️⃣ Elegí "Agregar a pantalla de inicio"\n4️⃣ ¡Listo! 🎉';
+  if (navigator.share) {
+    navigator.share({ title: 'FinanzasPro', text: texto, url: url }).catch(function(){});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto));
+  }
+  cerrarModal();
+}
+function copiarLink() {
+  navigator.clipboard.writeText(window.location.href).then(function(){
+    alert('✓ Link copiado al portapapeles');
+  }).catch(function(){
+    alert(window.location.href);
+  });
+  cerrarModal();
+}
+
+// ── Guardar ──────────────────────────────────────────────────────────────────
+function guardar() { localStorage.setItem(KEY, JSON.stringify(movimientos)); }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+buildCatGrid();
+setTipo('gasto');
 initFiltro();
 actualizar();
 </script>
