@@ -1,196 +1,298 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas Gasti</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2310b981'/%3E%3Ctext y='.9em' x='50%25' text-anchor='middle' font-size='80' fill='white'%3E$%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2310b981'/%3E%3Ctext y='.9em' x='50%25' text-anchor='middle' font-size='80' fill='white'%3E$%3C/text%3E%3C/svg%3E">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Finanzas Gasti</title>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GastiFin">
+<!-- Ícono PNG generado por canvas (funciona en Safari iOS) -->
+<script>
+(function(){
+  var c = document.createElement('canvas');
+  c.width = c.height = 512;
+  var x = c.getContext('2d');
+  // Fondo verde fluor redondeado
+  x.fillStyle = '#00ff88';
+  x.beginPath();
+  x.roundRect(0, 0, 512, 512, 90);
+  x.fill();
+  // Símbolo $ negro bold
+  x.fillStyle = '#000';
+  x.font = 'bold 340px Arial';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText('$', 256, 275);
+  var url = c.toDataURL('image/png');
+  // Apple Touch Icon — debe ir ANTES que cualquier otro link de ícono
+  var l = document.createElement('link');
+  l.rel = 'apple-touch-icon'; l.href = url;
+  document.head.prepend(l);
+  // Favicon
+  var f = document.createElement('link');
+  f.rel = 'icon'; f.type = 'image/png'; f.href = url;
+  document.head.appendChild(f);
+  // Manifest PWA dinámico
+  var manifest = {
+    name: 'Finanzas Gasti', short_name: 'Finanzas Gasti',
+    start_url: '.', display: 'standalone',
+    background_color: '#0f172a', theme_color: '#00ff88',
+    icons: [{ src: url, sizes: '512x512', type: 'image/png' }]
+  };
+  var ml = document.createElement('link');
+  ml.rel = 'manifest';
+  ml.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
+  document.head.appendChild(ml);
+})();
+</script>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanzas Gasti">
+<meta name="theme-color" content="#00ff88">
+
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  select option { background: #1e293b; }
+</style>
 </head>
-<body class="bg-[#0f172a] text-slate-200 font-sans">
-    <div class="max-w-md mx-auto p-5 pb-24">
-        
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance</h1>
-            <button onclick="borrarTodo()" class="bg-rose-900/30 p-2 rounded-xl text-rose-400 border border-rose-500/30">🗑️</button>
-        </div>
 
-        <div class="bg-slate-800 rounded-[2rem] p-7 text-white shadow-2xl mb-8 border border-slate-700 relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Disponible Real</p>
-                <h2 id="balance" class="text-4xl font-bold mb-6 text-yellow-400">$ 0</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-2">
-                            <span id="label-info" class="text-slate-400 uppercase font-bold tracking-tighter">Gasto / Ingresos Mes</span>
-                            <span id="porcentaje" class="font-bold text-blue-400 text-xs">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
-                            <div id="barra-progreso" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body class="bg-[#0f172a] text-slate-200">
+<div class="max-w-md mx-auto p-5 pb-28">
 
-        <div class="mb-6">
-            <select id="filtro-mes" onchange="actualizar()" class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none">
-                </select>
-        </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance <span style="color:#00ff88">Gasti</span></h1>
+    <button onclick="borrarTodo()" class="bg-rose-900/30 p-3 rounded-xl text-rose-400 border border-rose-500/30 text-lg">🗑️</button>
+  </div>
 
-        <div class="bg-slate-800 rounded-3xl p-6 border border-slate-700 mb-8 shadow-xl">
-            <div class="grid grid-cols-1 gap-4">
-                <input id="desc" type="text" placeholder="¿Qué es?" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-emerald-500">
-                <div class="flex gap-2">
-                    <input id="monto" type="number" placeholder="Monto $" class="flex-1 p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-emerald-500">
-                    <select id="cat" class="bg-slate-700 px-4 rounded-2xl text-2xl border border-slate-600">
-                        <option value="comida">🍔</option>
-                        <option value="alquiler">🏠</option>
-                        <option value="expensas">🏢</option>
-                        <option value="telefono">📱</option>
-                        <option value="sueldo">💰</option>
-                        <option value="otros">📦</option>
-                    </select>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="agregar('ingreso')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-emerald-900/20 text-lg">Ingreso</button>
-                    <button onclick="agregar('gasto')" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-rose-900/20 text-lg">Gasto</button>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 px-2">Movimientos del mes</h3>
-        <ul id="lista" class="space-y-3"></ul>
+  <!-- Card saldo -->
+  <div class="bg-slate-800 rounded-[2rem] p-7 text-white shadow-2xl mb-6 border border-slate-700">
+    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Disponible Real</p>
+    <h2 id="balance" class="text-4xl font-bold mb-1" style="color:#00ff88">$ 0</h2>
+    <div class="flex gap-6 mb-5 mt-2">
+      <div>
+        <p class="text-slate-500 text-xs uppercase tracking-wider">Ingresos mes</p>
+        <p id="total-ingresos" class="text-emerald-400 font-bold text-lg">$ 0</p>
+      </div>
+      <div>
+        <p class="text-slate-500 text-xs uppercase tracking-wider">Gastos mes</p>
+        <p id="total-gastos" class="text-rose-400 font-bold text-lg">$ 0</p>
+      </div>
     </div>
+    <div class="flex justify-between text-[10px] mb-2">
+      <span class="text-slate-400 uppercase font-bold tracking-tighter">Gasto / Ingreso del mes</span>
+      <span id="porcentaje" class="font-bold text-xs" style="color:#00ff88">0%</span>
+    </div>
+    <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
+      <div id="barra" class="h-3 rounded-full transition-all duration-500" style="width:0%;background:#00ff88"></div>
+    </div>
+  </div>
 
-    <script>
-        const iconMap = { comida: '🍔', alquiler: '🏠', expensas: '🏢', telefono: '📱', sueldo: '💰', otros: '📦' };
-        // Usamos una clave diferente para asegurar que los datos antiguos no corrompan la lógica nueva
-        let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v2026_final')) || [];
+  <!-- Filtro mes -->
+  <select id="filtro-mes" onchange="actualizar()"
+    class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none mb-5 font-bold">
+  </select>
 
-        function initFiltro() {
-            const select = document.getElementById('filtro-mes');
-            // Aseguramos que siempre haya al menos el mes actual si no hay datos
-            const mesesCargados = [...new Set(movimientos.map(m => {
-                const f = new Date(m.fecha);
-                return `${f.getMonth()}-${f.getFullYear()}`;
-            }))];
-            
-            const hoy = new Date();
-            const mesActualLabel = `${hoy.getMonth()}-${hoy.getFullYear()}`;
-            if (!mesesCargados.includes(mesActualLabel)) mesesCargados.push(mesActualLabel);
+  <!-- Formulario -->
+  <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700 mb-6 shadow-xl">
+    <div class="grid gap-3">
+      <input id="desc" type="text" placeholder="¿Qué es? (ej: Alquiler Mayo)"
+        class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors">
+      <div class="flex gap-2">
+        <input id="monto" type="number" placeholder="Monto $"
+          class="flex-1 p-4 bg-slate-900 border border-slate-700 rounded-2xl outline-none text-white focus:border-[#00ff88] transition-colors">
+        <select id="cat" class="bg-slate-700 px-4 rounded-2xl text-2xl border border-slate-600 outline-none">
+          <option value="comida">🍔</option>
+          <option value="alquiler">🏠</option>
+          <option value="expensas">🏢</option>
+          <option value="telefono">📱</option>
+          <option value="cuotas">💳</option>
+          <option value="sueldo">💰</option>
+          <option value="transporte">🚌</option>
+          <option value="salud">❤️‍🩹</option>
+          <option value="otros">📦</option>
+        </select>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="agregar('ingreso')"
+          class="flex-1 font-bold py-4 rounded-2xl active:scale-95 transition-all text-lg text-black"
+          style="background:#00ff88">+ Ingreso</button>
+        <button onclick="agregar('gasto')"
+          class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all text-lg">
+          − Gasto</button>
+      </div>
+    </div>
+  </div>
 
-            // Ordenamos los meses (más recientes primero)
-            mesesCargados.sort((a, b) => {
-                const [mA, aA] = a.split('-');
-                const [mB, aB] = b.split('-');
-                return new Date(aB, mB) - new Date(aA, mA);
-            });
+  <!-- Botón exportar Excel -->
+  <button onclick="exportarExcel()"
+    class="w-full mb-6 py-4 rounded-2xl font-bold text-black text-lg active:scale-95 transition-all border-2 flex items-center justify-center gap-2"
+    style="background:#00ff88;border-color:#00cc66">
+    📊 Exportar a Excel (.csv)
+  </button>
 
-            select.innerHTML = mesesCargados.map(m => {
-                const [mes, anio] = m.split('-');
-                const fechaLabel = new Date(anio, mes).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
-                return `<option value="${m}" ${m === mesActualLabel ? 'selected' : ''}>${fechaLabel.toUpperCase()}</option>`;
-            }).join('');
-        }
+  <!-- Lista -->
+  <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 px-1">Movimientos del mes</h3>
+  <ul id="lista" class="space-y-3"></ul>
 
-        function actualizar() {
-            const lista = document.getElementById('lista');
-            const balanceElt = document.getElementById('balance');
-            const barra = document.getElementById('barra-progreso');
-            const porcElt = document.getElementById('porcentaje');
-            const filtroElt = document.getElementById('filtro-mes');
-            
-            // Si no hay datos, el filtro puede no existir todavía
-            if (!filtroElt || !filtroElt.value) {
-                initFiltro();
-            }
-            const filtro = filtroElt.value;
-            const [fMes, fAnio] = filtro.split('-');
+</div>
 
-            lista.innerHTML = '';
-            let balanceTotal = 0;
-            let ingresosMes = 0;
-            let gastosMes = 0;
+<script>
+const iconMap = { comida:'🍔', alquiler:'🏠', expensas:'🏢', telefono:'📱', cuotas:'💳', sueldo:'💰', transporte:'🚌', salud:'❤️‍🩹', otros:'📦' };
+const KEY = 'finanzas_gasti_v3';
+let movimientos = JSON.parse(localStorage.getItem(KEY)) || [];
 
-            movimientos.forEach(m => {
-                const f = new Date(m.fecha);
-                const esIngreso = m.tipo === 'ingreso';
-                const monto = parseFloat(m.monto);
-                
-                // Balance Global (siempre suma/resta todo)
-                balanceTotal += esIngreso ? monto : -monto;
+function guardar() {
+  localStorage.setItem(KEY, JSON.stringify(movimientos));
+}
 
-                // Solo calculamos y mostramos si es el mes filtrado
-                if (f.getMonth() == fMes && f.getFullYear() == fAnio) {
-                    if (esIngreso) ingresosMes += monto;
-                    else gastosMes += monto;
+function mesKey(fecha) {
+  var f = new Date(fecha);
+  return f.getFullYear() + '-' + String(f.getMonth()).padStart(2,'0');
+}
 
-                    lista.innerHTML = `
-                        <li class="flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700 mb-2">
-                            <div class="flex items-center gap-4">
-                                <div class="bg-slate-900 w-10 h-10 flex items-center justify-center rounded-xl text-xl border border-slate-700">${iconMap[m.cat] || '📦'}</div>
-                                <div><p class="text-sm font-bold text-slate-200">${m.desc}</p></div>
-                            </div>
-                            <span class="${esIngreso ? 'text-emerald-400' : 'text-rose-400'} font-black text-lg">$${monto.toLocaleString()}</span>
-                        </li>` + lista.innerHTML; // Agrega arriba
-                }
-            });
+function mesLabel(key) {
+  var parts = key.split('-');
+  var f = new Date(parseInt(parts[0]), parseInt(parts[1]));
+  return f.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }).toUpperCase();
+}
 
-            balanceElt.innerText = `$ ${balanceTotal.toLocaleString()}`;
-            
-            // Barra de progreso dinámica: Porcentaje de gastos sobre ingresos del mes
-            let porc = ingresosMes > 0 ? (gastosMes / ingresosMes) * 100 : 0;
-            if (porc > 100) porc = 100; // Cap al 100%
-            
-            // Si no hay ingresos, la barra no se mueve, pero si hay gastos y 0 ingresos, mostramos 100% de consumo (rojo)
-            if (ingresosMes === 0 && gastosMes > 0) porc = 100;
+function initFiltro() {
+  var sel = document.getElementById('filtro-mes');
+  var actual = mesKey(new Date());
+  var meses = [...new Set(movimientos.map(m => mesKey(m.fecha)))];
+  if (!meses.includes(actual)) meses.push(actual);
+  meses.sort((a,b) => b.localeCompare(a)); // más reciente primero
+  var prev = sel.value || actual;
+  sel.innerHTML = meses.map(m =>
+    '<option value="' + m + '"' + (m === prev ? ' selected' : '') + '>' + mesLabel(m) + '</option>'
+  ).join('');
+}
 
-            barra.style.width = porc + '%';
-            porcElt.innerText = Math.round(porc) + '% del Ingreso';
-            
-            // Cambiar color de la barra según el consumo
-            if (porc > 90) barra.className = "bg-rose-500 h-3 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]";
-            else if (porc > 70) barra.className = "bg-orange-400 h-3 rounded-full transition-all duration-500";
-            else barra.className = "bg-blue-500 h-3 rounded-full transition-all duration-500";
+function actualizar() {
+  var sel = document.getElementById('filtro-mes');
+  var filtro = sel.value || mesKey(new Date());
+  var lista = document.getElementById('lista');
+  var balanceElt = document.getElementById('balance');
+  var barra = document.getElementById('barra');
+  var porcElt = document.getElementById('porcentaje');
 
-            localStorage.setItem('finanzas_gasti_v2026_final', JSON.stringify(movimientos));
-        }
+  lista.innerHTML = '';
+  var balanceTotal = 0;
+  var ingresosMes = 0;
+  var gastosMes = 0;
+  var itemsMes = [];
 
-        function agregar(tipo) {
-            const desc = document.getElementById('desc').value;
-            const monto = document.getElementById('monto').value;
-            const cat = document.getElementById('cat').value;
-            if(desc && monto) {
-                // Forzamos que la fecha sea AHORA para el nuevo movimiento
-                movimientos.push({ desc, monto: parseFloat(monto), tipo, cat, fecha: new Date().toISOString() });
-                document.getElementById('desc').value = '';
-                document.getElementById('monto').value = '';
-                // Regeneramos el filtro por si es un mes nuevo
-                initFiltro();
-                actualizar();
-            }
-        }
+  movimientos.forEach(function(m) {
+    var esIngreso = m.tipo === 'ingreso';
+    var monto = parseFloat(m.monto);
+    balanceTotal += esIngreso ? monto : -monto;
+    if (mesKey(m.fecha) === filtro) {
+      if (esIngreso) ingresosMes += monto;
+      else gastosMes += monto;
+      itemsMes.push(m);
+    }
+  });
 
-        function borrarTodo() {
-            if(confirm('¿Reiniciar todo el historial?')) {
-                movimientos = [];
-                localStorage.clear();
-                // Forzamos recarga para resetear todo el estado
-                location.reload();
-            }
-        }
+  // Mostrar items del mes (más recientes primero)
+  itemsMes.slice().reverse().forEach(function(m) {
+    var esIngreso = m.tipo === 'ingreso';
+    var monto = parseFloat(m.monto);
+    var li = document.createElement('li');
+    li.className = 'flex justify-between items-center p-4 bg-slate-800 rounded-2xl border border-slate-700';
+    li.innerHTML =
+      '<div class="flex items-center gap-3">' +
+        '<div class="bg-slate-900 w-10 h-10 flex items-center justify-center rounded-xl text-xl border border-slate-700">' +
+          (iconMap[m.cat] || '📦') +
+        '</div>' +
+        '<div>' +
+          '<p class="text-sm font-bold text-slate-200">' + m.desc + '</p>' +
+          '<p class="text-xs text-slate-500">' + new Date(m.fecha).toLocaleDateString('es-AR') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<span class="font-black text-lg ' + (esIngreso ? 'text-emerald-400' : 'text-rose-400') + '">' +
+        (esIngreso ? '+' : '-') + '$ ' + monto.toLocaleString('es-AR') +
+      '</span>';
+    lista.appendChild(li);
+  });
 
-        // Arrancamos
-        initFiltro();
-        actualizar();
-    </script>
+  if (itemsMes.length === 0) {
+    lista.innerHTML = '<li class="text-center text-slate-600 py-8 text-sm">Sin movimientos este mes</li>';
+  }
+
+  // Balance
+  balanceElt.innerText = '$ ' + balanceTotal.toLocaleString('es-AR');
+  balanceElt.style.color = balanceTotal >= 0 ? '#00ff88' : '#f87171';
+
+  // Totales mes
+  document.getElementById('total-ingresos').innerText = '$ ' + ingresosMes.toLocaleString('es-AR');
+  document.getElementById('total-gastos').innerText = '$ ' + gastosMes.toLocaleString('es-AR');
+
+  // Barra
+  var porc = ingresosMes > 0 ? (gastosMes / ingresosMes) * 100 : (gastosMes > 0 ? 100 : 0);
+  porc = Math.min(porc, 100);
+  barra.style.width = porc + '%';
+  porcElt.innerText = Math.round(porc) + '% del Ingreso';
+  if (porc > 90) { barra.style.background = '#f87171'; porcElt.style.color = '#f87171'; }
+  else if (porc > 70) { barra.style.background = '#fb923c'; porcElt.style.color = '#fb923c'; }
+  else { barra.style.background = '#00ff88'; porcElt.style.color = '#00ff88'; }
+
+  guardar();
+}
+
+function agregar(tipo) {
+  var desc = document.getElementById('desc').value.trim();
+  var monto = parseFloat(document.getElementById('monto').value);
+  var cat = document.getElementById('cat').value;
+  if (!desc || !monto || monto <= 0) {
+    alert('Completá la descripción y el monto 👆');
+    return;
+  }
+  movimientos.push({ desc: desc, monto: monto, tipo: tipo, cat: cat, fecha: new Date().toISOString() });
+  document.getElementById('desc').value = '';
+  document.getElementById('monto').value = '';
+  initFiltro();
+  actualizar();
+}
+
+function borrarTodo() {
+  if (confirm('¿Reiniciar todo el historial? Esta acción no se puede deshacer.')) {
+    movimientos = [];
+    localStorage.removeItem(KEY);
+    initFiltro();
+    actualizar();
+  }
+}
+
+function exportarExcel() {
+  if (movimientos.length === 0) { alert('No hay movimientos para exportar.'); return; }
+  var filas = [['Fecha','Tipo','Categoría','Descripción','Monto']];
+  movimientos.slice().sort((a,b) => new Date(a.fecha)-new Date(b.fecha)).forEach(function(m) {
+    filas.push([
+      new Date(m.fecha).toLocaleDateString('es-AR'),
+      m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto',
+      iconMap[m.cat] + ' ' + m.cat,
+      m.desc,
+      m.monto
+    ]);
+  });
+  // BOM para que Excel reconozca tildes y ñ
+  var csv = '\uFEFF' + filas.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'finanzas_gasti_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// Init
+initFiltro();
+actualizar();
+</script>
 </body>
 </html>
