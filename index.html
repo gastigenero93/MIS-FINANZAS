@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Finanzas Gasti PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1X6G0Tq1-y6y-yL5Zp_38xYx36yF-X26G">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body class="bg-[#0f172a] text-slate-200 font-sans"> <div class="max-w-md mx-auto p-5 pb-24">
+<body class="bg-[#0f172a] text-slate-200 font-sans">
+    <div class="max-w-md mx-auto p-5 pb-24">
         
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-extrabold tracking-tight text-white">Balance</h1>
@@ -26,7 +29,7 @@
                 <div class="space-y-4">
                     <div>
                         <div class="flex justify-between text-[10px] mb-2">
-                            <span id="label-presupuesto" class="text-slate-400 uppercase font-bold tracking-tighter">Límite: $1.200.000</span>
+                            <span id="label-presupuesto" class="text-slate-400 uppercase font-bold tracking-tighter">Límite (Sueldo): $1.200.000</span>
                             <span id="porcentaje" class="font-bold text-blue-400 text-xs">0%</span>
                         </div>
                         <div class="w-full bg-slate-900 h-3 rounded-full border border-slate-700">
@@ -68,8 +71,6 @@
     <script>
         const iconMap = { comida: '🍔', alquiler: '🏠', expensas: '🏢', telefono: '📱', sueldo: '💰', otros: '📦' };
         let movimientos = JSON.parse(localStorage.getItem('finanzas_gasti_v5')) || [];
-        
-        // El presupuesto ahora se guarda para que no se resetee
         let presupuestoDinamico = parseFloat(localStorage.getItem('presupuesto_gasti')) || 1200000;
 
         function actualizar() {
@@ -87,9 +88,6 @@
             lista.innerHTML = '';
             let balance = 0;
             let gastoMes = 0;
-            
-            // Si el mes cambió, podrías resetear el presupuesto dinámico aquí si quisieras, 
-            // pero por ahora mantenemos el último sueldo ingresado.
 
             movimientos.slice().reverse().forEach((m) => {
                 const fechaM = new Date(m.fecha);
@@ -142,7 +140,6 @@
             if(desc && monto) {
                 const montoNum = parseFloat(monto);
                 
-                // Si es un ingreso y la categoría es SUELDO, actualizamos el presupuesto del mes
                 if (tipo === 'ingreso' && cat === 'sueldo') {
                     presupuestoDinamico = montoNum;
                 }
