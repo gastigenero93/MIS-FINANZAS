@@ -1,279 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mis Finanzas</title>
-
-<!-- iOS PWA -->
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Mis Finanzas"/>
-<meta name="theme-color" content="#6366f1"/>
-
-<!-- Apple Touch Icon generado inline con canvas -->
-<script>
-(function(){
-  const c=document.createElement("canvas");
-  c.width=c.height=180;
-  const x=c.getContext("2d");
-  const g=x.createLinearGradient(0,0,180,180);
-  g.addColorStop(0,"#1e1b4b");g.addColorStop(1,"#0f172a");
-  x.fillStyle=g;
-  x.beginPath();x.roundRect(0,0,180,180,36);x.fill();
-  x.font="95px serif";x.textAlign="center";x.textBaseline="middle";
-  x.fillText("💰",90,95);
-  const l=document.createElement("link");
-  l.rel="apple-touch-icon";l.href=c.toDataURL("image/png");
-  document.head.prepend(l); // prepend para tener prioridad
-})();
-</script>
-
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh}
-  input,select,button{font-family:inherit}
-  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mis Finanzas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1077/1077046.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body>
-<div id="root"></div>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto p-4">
+        <div class="bg-white rounded-3xl shadow-xl p-6 mt-4">
+            <h1 class="text-2xl font-bold text-gray-800">Mis Finanzas</h1>
+            <p class="text-gray-500 mb-6">Hola, Gastón 👋</p>
 
-<!-- React + Recharts via CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.5.0/Recharts.js"></script>
+            <div class="bg-blue-600 rounded-2xl p-6 text-white mb-6 shadow-lg shadow-blue-200">
+                <p class="text-blue-100 text-sm uppercase tracking-wider font-semibold">Total Gastado</p>
+                <p id="total" class="text-4xl font-bold mt-1">$ 0</p>
+            </div>
 
-<script>
-const {useState,useMemo,useEffect}=React;
-const {PieChart,Pie,Cell,Tooltip,Legend,ResponsiveContainer,BarChart,Bar,XAxis,YAxis,CartesianGrid}=Recharts;
+            <div class="space-y-3">
+                <input id="desc" type="text" placeholder="¿En qué gastaste?" class="w-full p-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="monto" type="number" placeholder="Monto $" class="w-full p-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <button onclick="agregar()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-md">
+                    ➕ Agregar Gasto
+                </button>
+            </div>
 
-const ALL_CAT=[
-  {label:"Alquiler",color:"#818cf8"},{label:"Expensas",color:"#a78bfa"},
-  {label:"Teléfono",color:"#f472b6"},{label:"Cuotas",color:"#fbbf24"},
-  {label:"Comida",color:"#34d399"},{label:"Gastos del día",color:"#60a5fa"},
-  {label:"Transporte",color:"#2dd4bf"},{label:"Salud",color:"#f87171"},
-  {label:"Otros",color:"#94a3b8"},{label:"Sueldo",color:"#4ade80"},
-  {label:"Freelance",color:"#86efac"},{label:"Alquiler cobrado",color:"#6ee7b7"},
-  {label:"Inversiones",color:"#a3e635"},{label:"Otros ingresos",color:"#d9f99d"},
-];
-const CATS_G=ALL_CAT.slice(0,9);
-const CATS_I=ALL_CAT.slice(9);
-const cMap=Object.fromEntries(ALL_CAT.map(c=>[c.label,c.color]));
+            <div class="mt-8">
+                <h3 class="text-gray-400 text-xs font-bold uppercase mb-4">Últimos movimientos</h3>
+                <ul id="lista" class="space-y-3">
+                    </ul>
+            </div>
+        </div>
+    </div>
 
-const DEMO_G=[
-  {id:1,desc:"Alquiler Mayo",cat:"Alquiler",monto:120000,fecha:"2026-04-01"},
-  {id:2,desc:"Expensas",cat:"Expensas",monto:18000,fecha:"2026-04-03"},
-  {id:3,desc:"Mercado",cat:"Comida",monto:35000,fecha:"2026-04-10"},
-];
-const DEMO_I=[{id:101,desc:"Sueldo Abril",cat:"Sueldo",monto:450000,fecha:"2026-04-05"}];
+    <script>
+        let gastos = JSON.parse(localStorage.getItem('gastos_gaston')) || [];
+        
+        function actualizar() {
+            const lista = document.getElementById('lista');
+            const totalElt = document.getElementById('total');
+            lista.innerHTML = '';
+            let total = 0;
+            
+            gastos.reverse().forEach((g, i) => {
+                total += parseFloat(g.monto);
+                lista.innerHTML += `
+                    <li class="flex justify-between items-center p-4 bg-gray-50 rounded-xl animate-fade-in">
+                        <span class="text-gray-700 font-medium">${g.desc}</span>
+                        <span class="text-red-500 font-bold">-$${parseFloat(g.monto).toLocaleString()}</span>
+                    </li>`;
+            });
+            gastos.reverse(); // Volver al orden original
+            totalElt.innerText = `$ ${total.toLocaleString()}`;
+            localStorage.setItem('gastos_gaston', JSON.stringify(gastos));
+        }
 
-function fARS(n){return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n)}
-function today(){return new Date().toISOString().slice(0,10)}
-function load(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
-
-function Card({label,value,color,sub}){
-  return React.createElement("div",{style:{background:"#0f172a",borderRadius:14,padding:"14px 12px",border:`1px solid ${color}22`}},
-    React.createElement("div",{style:{fontSize:11,color:"#64748b",marginBottom:4}},label),
-    React.createElement("div",{style:{fontSize:18,fontWeight:800,color}},value),
-    React.createElement("div",{style:{fontSize:10,color:"#475569",marginTop:2}},sub)
-  );
-}
-
-function Row({item,tipo,onEdit,onDelete}){
-  const col=tipo==="ingreso"?"#4ade80":"#f87171";
-  return React.createElement("div",{style:{background:"#0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:10,border:"1px solid #1e293b"}},
-    React.createElement("div",{style:{width:8,height:8,borderRadius:"50%",background:cMap[item.cat]||col,flexShrink:0}}),
-    React.createElement("div",{style:{flex:1}},
-      React.createElement("div",{style:{fontSize:13,fontWeight:600}},item.desc||item.cat),
-      React.createElement("div",{style:{fontSize:11,color:"#475569"}},`${item.cat} · ${item.fecha}`)
-    ),
-    React.createElement("div",{style:{fontWeight:700,fontSize:14,color:col}},(tipo==="ingreso"?"+":"-")+fARS(item.monto)),
-    React.createElement("button",{onClick:onEdit,style:{background:"none",border:"none",cursor:"pointer",fontSize:14}},"✏️"),
-    React.createElement("button",{onClick:onDelete,style:{background:"none",border:"none",cursor:"pointer",fontSize:14}},"🗑️")
-  );
-}
-
-function STitle({children}){
-  return React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#475569",letterSpacing:1,textTransform:"uppercase",marginBottom:8}},children);
-}
-
-function App(){
-  const [gastos,setGastos]=useState(()=>load("gaston_gastos",DEMO_G));
-  const [ingresos,setIngresos]=useState(()=>load("gaston_ingresos",DEMO_I));
-  const [tab,setTab]=useState("resumen");
-  const [tipo,setTipo]=useState("gasto");
-  const [filtro,setFiltro]=useState("Todos");
-  const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({desc:"",cat:CATS_G[0].label,monto:"",fecha:today()});
-
-  useEffect(()=>{localStorage.setItem("gaston_gastos",JSON.stringify(gastos))},[gastos]);
-  useEffect(()=>{localStorage.setItem("gaston_ingresos",JSON.stringify(ingresos))},[ingresos]);
-
-  const totalG=useMemo(()=>gastos.reduce((s,g)=>s+g.monto,0),[gastos]);
-  const totalI=useMemo(()=>ingresos.reduce((s,i)=>s+i.monto,0),[ingresos]);
-  const saldo=totalI-totalG;
-  const pct=totalI>0?Math.min((totalG/totalI)*100,100):0;
-
-  const porCat=useMemo(()=>{
-    const m={};gastos.forEach(g=>{m[g.cat]=(m[g.cat]||0)+g.monto});
-    return Object.entries(m).map(([name,value])=>({name,value,color:cMap[name]||"#94a3b8"}));
-  },[gastos]);
-
-  function resetForm(){setEditId(null);setForm({desc:"",cat:(tipo==="gasto"?CATS_G:CATS_I)[0].label,monto:"",fecha:today()})}
-
-  function handleSubmit(){
-    const monto=Number(form.monto);
-    if(!monto||monto<=0)return;
-    const entry={id:Date.now(),...form,monto};
-    if(tipo==="gasto") setGastos(p=>editId?p.map(g=>g.id===editId?entry:g):[...p,entry]);
-    else setIngresos(p=>editId?p.map(i=>i.id===editId?entry:i):[...p,entry]);
-    resetForm();
-  }
-
-  function handleEdit(item,t){
-    setTipo(t);setEditId(item.id);
-    setForm({desc:item.desc,cat:item.cat,monto:String(item.monto),fecha:item.fecha});
-    setTab("cargar");
-  }
-
-  function handleDelete(id,t){
-    if(t==="gasto") setGastos(p=>p.filter(g=>g.id!==id));
-    else setIngresos(p=>p.filter(i=>i.id!==id));
-  }
-
-  function exportCSV(){
-    const rows=[["Tipo","Descripción","Categoría","Monto","Fecha"],
-      ...ingresos.map(i=>["Ingreso",i.desc,i.cat,i.monto,i.fecha]),
-      ...gastos.map(g=>["Gasto",g.desc,g.cat,g.monto,g.fecha])];
-    const blob=new Blob([rows.map(r=>r.join(",")).join("\n")],{type:"text/csv"});
-    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-    a.download="finanzas_gaston.csv";a.click();
-  }
-
-  const inp={padding:"10px 14px",borderRadius:10,border:"1px solid #1e293b",fontSize:13,background:"#1e293b",color:"#e2e8f0",width:"100%",outline:"none"};
-  const btnP={border:"none",borderRadius:10,padding:"11px 22px",fontWeight:700,fontSize:14,cursor:"pointer"};
-  const btnS={background:"#1e293b",color:"#94a3b8",border:"none",borderRadius:10,padding:"11px 18px",fontWeight:600,fontSize:14,cursor:"pointer"};
-
-  const h=React.createElement;
-
-  return h("div",{style:{minHeight:"100vh",background:"#0a0f1e",color:"#e2e8f0"}},
-    // Header
-    h("div",{style:{background:"linear-gradient(135deg,#1e1b4b 0%,#0f172a 100%)",padding:"24px 20px 28px",borderBottom:"1px solid #1e293b"}},
-      h("div",{style:{maxWidth:720,margin:"0 auto"}},
-        h("div",{style:{color:"#818cf8",fontSize:11,letterSpacing:3,textTransform:"uppercase",marginBottom:4}},"Panel Financiero"),
-        h("div",{style:{fontSize:24,fontWeight:800,marginBottom:20}},"Hola, Gastón 👋"),
-        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}},
-          h(Card,{label:"💰 Ingresos",value:fARS(totalI),color:"#4ade80",sub:"este período"}),
-          h(Card,{label:"💸 Gastos",value:fARS(totalG),color:"#f87171",sub:"este período"}),
-          h(Card,{label:"🏦 Saldo",value:fARS(saldo),color:saldo>=0?"#818cf8":"#fb923c",sub:saldo>=0?"disponible":"en rojo"})
-        ),
-        h("div",{style:{marginTop:16}},
-          h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#64748b",marginBottom:5}},
-            h("span",null,"Gastado del ingreso"),h("span",null,pct.toFixed(1)+"%")
-          ),
-          h("div",{style:{height:8,background:"#1e293b",borderRadius:99,overflow:"hidden"}},
-            h("div",{style:{height:"100%",width:`${pct}%`,borderRadius:99,background:pct>90?"#ef4444":pct>70?"#f59e0b":"#818cf8",transition:"width .6s"}})
-          )
-        )
-      )
-    ),
-    // Body
-    h("div",{style:{maxWidth:720,margin:"0 auto",padding:"20px 16px"}},
-      // Tabs
-      h("div",{style:{display:"flex",gap:6,marginBottom:20,background:"#0f172a",borderRadius:14,padding:4}},
-        [["resumen","📊"],["movimientos","📋"],["cargar","➕"],["grafico","🥧"]].map(([k,ic])=>
-          h("button",{key:k,onClick:()=>{setTab(k);if(k==="cargar")resetForm()},style:{
-            flex:1,padding:"9px 4px",border:"none",borderRadius:10,cursor:"pointer",fontSize:12,fontWeight:700,
-            background:tab===k?"#6366f1":"transparent",color:tab===k?"#fff":"#64748b"
-          }},ic+" "+k.charAt(0).toUpperCase()+k.slice(1))
-        )
-      ),
-
-      // RESUMEN
-      tab==="resumen"&&h("div",null,
-        h(STitle,null,"Ingresos recientes"),
-        ingresos.slice(-3).reverse().map(i=>h(Row,{key:i.id,item:i,tipo:"ingreso",onEdit:()=>handleEdit(i,"ingreso"),onDelete:()=>handleDelete(i.id,"ingreso")})),
-        h(STitle,{style:{marginTop:16}},null,"Últimos gastos"),
-        gastos.slice(-5).reverse().map(g=>h(Row,{key:g.id,item:g,tipo:"gasto",onEdit:()=>handleEdit(g,"gasto"),onDelete:()=>handleDelete(g.id,"gasto")})),
-        h("button",{onClick:exportCSV,style:{...btnS,marginTop:16,width:"100%"}},"⬇️ Exportar CSV")
-      ),
-
-      // MOVIMIENTOS
-      tab==="movimientos"&&h("div",null,
-        h("div",{style:{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}},
-          ["Todos","Ingresos","Gastos",...CATS_G.map(c=>c.label)].map(f=>
-            h("button",{key:f,onClick:()=>setFiltro(f),style:{
-              padding:"4px 12px",borderRadius:20,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,
-              background:filtro===f?(cMap[f]||"#6366f1"):"#1e293b",color:filtro===f?"#0a0f1e":"#94a3b8"
-            }},f)
-          )
-        ),
-        filtro!=="Gastos"&&ingresos.filter(()=>filtro==="Todos"||filtro==="Ingresos").map(i=>h(Row,{key:i.id,item:i,tipo:"ingreso",onEdit:()=>handleEdit(i,"ingreso"),onDelete:()=>handleDelete(i.id,"ingreso")})),
-        filtro!=="Ingresos"&&gastos.filter(g=>filtro==="Todos"||filtro==="Gastos"||g.cat===filtro).map(g=>h(Row,{key:g.id,item:g,tipo:"gasto",onEdit:()=>handleEdit(g,"gasto"),onDelete:()=>handleDelete(g.id,"gasto")}))
-      ),
-
-      // CARGAR
-      tab==="cargar"&&h("div",{style:{background:"#0f172a",borderRadius:18,padding:22,border:"1px solid #1e293b"}},
-        h("div",{style:{display:"flex",background:"#1e293b",borderRadius:12,padding:4,marginBottom:18}},
-          [["gasto","💸 Gasto"],["ingreso","💰 Ingreso"]].map(([t,lbl])=>
-            h("button",{key:t,onClick:()=>{setTipo(t);setForm(f=>({...f,cat:(t==="gasto"?CATS_G:CATS_I)[0].label}))},style:{
-              flex:1,padding:"9px",border:"none",borderRadius:9,cursor:"pointer",fontWeight:700,fontSize:14,
-              background:tipo===t?(t==="gasto"?"#ef4444":"#4ade80"):"transparent",
-              color:tipo===t?"#0a0f1e":"#64748b"
-            }},lbl)
-          )
-        ),
-        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
-          h("input",{placeholder:"Descripción",value:form.desc,onChange:e=>setForm(f=>({...f,desc:e.target.value})),style:inp}),
-          h("select",{value:form.cat,onChange:e=>setForm(f=>({...f,cat:e.target.value})),style:inp},
-            (tipo==="gasto"?CATS_G:CATS_I).map(c=>h("option",{key:c.label},c.label))
-          ),
-          h("input",{type:"number",placeholder:"Monto $",value:form.monto,onChange:e=>setForm(f=>({...f,monto:e.target.value})),style:inp}),
-          h("input",{type:"date",value:form.fecha,onChange:e=>setForm(f=>({...f,fecha:e.target.value})),style:inp})
-        ),
-        h("div",{style:{display:"flex",gap:10,marginTop:14}},
-          h("button",{onClick:handleSubmit,style:{...btnP,flex:1,background:tipo==="gasto"?"#6366f1":"#4ade80",color:tipo==="gasto"?"#fff":"#0a0f1e"}},
-            editId?"💾 Guardar cambios":`➕ Agregar ${tipo}`),
-          editId&&h("button",{onClick:resetForm,style:btnS},"Cancelar")
-        )
-      ),
-
-      // GRÁFICO
-      tab==="grafico"&&h("div",null,
-        h("div",{style:{background:"#0f172a",borderRadius:18,padding:20,border:"1px solid #1e293b",marginBottom:16}},
-          h("div",{style:{fontWeight:700,marginBottom:14,color:"#818cf8"}},"Gastos por categoría"),
-          porCat.length===0
-            ?h("div",{style:{textAlign:"center",color:"#475569",padding:30}},"Sin datos")
-            :h(ResponsiveContainer,{width:"100%",height:260},
-              h(PieChart,null,
-                h(Pie,{data:porCat,dataKey:"value",nameKey:"name",cx:"50%",cy:"50%",outerRadius:100,innerRadius:50},
-                  porCat.map((e,i)=>h(Cell,{key:i,fill:e.color}))
-                ),
-                h(Tooltip,{formatter:v=>fARS(v),contentStyle:{background:"#1e293b",border:"none",borderRadius:10,color:"#e2e8f0"}}),
-                h(Legend,{formatter:v=>React.createElement("span",{style:{color:"#cbd5e1",fontSize:12}},v)})
-              )
-            )
-        ),
-        h("div",{style:{background:"#0f172a",borderRadius:18,padding:20,border:"1px solid #1e293b"}},
-          h("div",{style:{fontWeight:700,marginBottom:14,color:"#4ade80"}},"Ingresos vs Gastos"),
-          h(ResponsiveContainer,{width:"100%",height:180},
-            h(BarChart,{data:[{name:"Este período",Ingresos:totalI,Gastos:totalG}]},
-              h(CartesianGrid,{strokeDasharray:"3 3",stroke:"#1e293b"}),
-              h(XAxis,{dataKey:"name",stroke:"#475569",tick:{fontSize:12}}),
-              h(YAxis,{stroke:"#475569",tick:{fontSize:11},tickFormatter:v=>`$${(v/1000).toFixed(0)}k`}),
-              h(Tooltip,{formatter:v=>fARS(v),contentStyle:{background:"#1e293b",border:"none",borderRadius:10,color:"#e2e8f0"}}),
-              h(Bar,{dataKey:"Ingresos",fill:"#4ade80",radius:[6,6,0,0]}),
-              h(Bar,{dataKey:"Gastos",fill:"#818cf8",radius:[6,6,0,0]})
-            )
-          )
-        )
-      )
-    )
-  );
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
-</script>
+        function agregar() {
+            const desc = document.getElementById('desc').value;
+            const monto = document.getElementById('monto').value;
+            if(desc && monto) {
+                gastos.push({desc, monto});
+                document.getElementById('desc').value = '';
+                document.getElementById('monto').value = '';
+                actualizar();
+            }
+        }
+        actualizar();
+    </script>
 </body>
 </html>
